@@ -14,6 +14,12 @@ export interface Perfume {
   image: string;
   isBestSeller?: boolean;
   accords?: { name: string; value: number; color: string }[];
+  numero?: number;
+  original?: string;
+  dupe1?: string | null;
+  dupe2?: string | null;
+  saison?: "ete" | "hiver" | "mi-saison" | "dubai" | "autre";
+  genre?: "homme" | "femme" | "unisexe";
 }
 
 export interface SlideData {

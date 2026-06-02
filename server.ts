@@ -8,8 +8,15 @@ import dotenv from "dotenv";
 
 dotenv.config();
 
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = path.dirname(__filename);
+// Safe path helpers for CJS & ESM environments
+let __filename = "";
+let __dirname = "";
+try {
+  __filename = fileURLToPath(import.meta.url);
+  __dirname = path.dirname(__filename);
+} catch (e) {
+  // CommonJS fallback
+}
 
 const app = express();
 const PORT = 3000;
@@ -43,15 +50,25 @@ function saveDynamicPerfumes(perfumes: any[]) {
   }
 }
 
-// Initialize Gemini Client
-const ai = new GoogleGenAI({
-  apiKey: process.env.GEMINI_API_KEY,
-  httpOptions: {
-    headers: {
-      "User-Agent": "aistudio-build",
-    },
-  },
-});
+// Lazy initialization of Gemini client to prevent startup crashes if GEMINI_API_KEY is missing
+let _ai: GoogleGenAI | null = null;
+function getAi(): GoogleGenAI {
+  if (!_ai) {
+    const key = process.env.GEMINI_API_KEY;
+    if (!key) {
+      throw new Error("GEMINI_API_KEY environment variable is not defined. Please verify your settings.");
+    }
+    _ai = new GoogleGenAI({
+      apiKey: key,
+      httpOptions: {
+        headers: {
+          "User-Agent": "aistudio-build",
+        },
+      },
+    });
+  }
+  return _ai;
+}
 
 // Path to deleted perfume list
 const deletedPerfumesPath = path.join(process.cwd(), "src", "deleted_perfume_ids.json");
@@ -872,7 +889,7 @@ Trouve et rapporte très précisément les données factuelles de la base de don
 6. Une description poétique de 2 à 3 lignes pour l'ambiance olfactive en français.
 7. L'URL réelle de l'image sur fimgs.net ou l'ID numérique de Fragrantica ou l'URL de l'image officielle sur Sephora/Dior/Chanel/etc. Compare toutes les sources de données de la recherche et sélectionne impérativement la meilleure image réelle du flacon de parfum (de préférence construite sous la forme : https://fimgs.net/images/perfume/375x500.[ID].jpg). Ne propose JAMAIS de lien Unsplash ou d'image générique !`;
 
-    const searchResponse = await ai.models.generateContent({
+    const searchResponse = await getAi().models.generateContent({
       model: "gemini-3.5-flash",
       contents: searchPrompt,
       config: {
@@ -915,7 +932,7 @@ CONSIGNES PARTICULIÈRES :
 4. Pour les accords (accords) : Propose les accords majeurs réels en français d'après Fragrantica / Parfumo et associe-leur des couleurs hexadécimales coordonnées à l'ambiance visuelle du parfum.
 5. Traduis toutes les notes olfactives (notes, topNotes, heartNotes, baseNotes) fidèlement en français (ex: "Bergamote", "Vanille de Madagascar", "Cèdre de l'Atlas").`;
 
-    const response = await ai.models.generateContent({
+    const response = await getAi().models.generateContent({
       model: "gemini-3.5-flash",
       contents: structuredStructurePrompt,
       config: {

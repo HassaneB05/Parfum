@@ -304,8 +304,16 @@ export default function App() {
     }
   };
 
-  // Merge static DB with dynamic database and filter out deleted ones
-  const allPerfumes = [...PERFUMES_DB, ...customPerfumes].filter(
+  // Merge static DB with dynamic database (prioritizing custom ones to avoid duplicate IDs) and filter out deleted ones
+  const uniqueMergedPerfumes: Perfume[] = [...customPerfumes];
+  const customIds = new Set(customPerfumes.map(p => p.id));
+  for (const staticPerfume of PERFUMES_DB) {
+    if (!customIds.has(staticPerfume.id)) {
+      uniqueMergedPerfumes.push(staticPerfume);
+    }
+  }
+
+  const allPerfumes = uniqueMergedPerfumes.filter(
     (perfume) => !deletedPerfumeIds.includes(perfume.id)
   );
   

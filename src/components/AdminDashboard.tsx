@@ -85,7 +85,20 @@ export default function AdminDashboard({
   // Batch Import State
   const [catalogMode, setCatalogMode] = useState<"single" | "batch">("single");
   const [batchFile, setBatchFile] = useState<File | null>(null);
-  const [batchLines, setBatchLines] = useState<Array<{ brand: string; model: string; status: "pending" | "processing" | "success" | "error"; error?: string }>>([]);
+  const [batchLines, setBatchLines] = useState<Array<{
+    numero: number;
+    original: string;
+    dupe1: string | null;
+    dupe2: string | null;
+    saison: "ete" | "hiver" | "mi-saison" | "dubai" | "autre";
+    genre: "homme" | "femme" | "unisexe";
+    brand: string;
+    model: string;
+    theme: "gold" | "pink" | "blue";
+    category: "Homme" | "Femme" | "Unisexe";
+    status: "pending" | "processing" | "success" | "error";
+    error?: string;
+  }>>([]);
   const [isBatchProcessing, setIsBatchProcessing] = useState(false);
   const [batchProgress, setBatchProgress] = useState(0);
   const [isDragOver, setIsDragOver] = useState(false);
@@ -171,17 +184,113 @@ export default function AdminDashboard({
       const text = event.target?.result as string;
       if (text) {
         const lines = text.split("\n");
-        const parsed: Array<{ brand: string; model: string; status: "pending" | "processing" | "success" | "error" }> = [];
+        const parsed: Array<{
+          numero: number;
+          original: string;
+          dupe1: string | null;
+          dupe2: string | null;
+          saison: "ete" | "hiver" | "mi-saison" | "dubai" | "autre";
+          genre: "homme" | "femme" | "unisexe";
+          brand: string;
+          model: string;
+          theme: "gold" | "pink" | "blue";
+          category: "Homme" | "Femme" | "Unisexe";
+          status: "pending";
+        }> = [];
+
+        let currentSaison: "ete" | "hiver" | "mi-saison" | "dubai" | "autre" = "ete";
+        let currentGenre: "homme" | "femme" | "unisexe" = "homme";
+        let currentCategory: "Homme" | "Femme" | "Unisexe" = "Homme";
+
         for (const line of lines) {
-          const item = parsePerfumeLine(line);
-          if (item && item.brand && item.model) {
-            parsed.push({
-              brand: item.brand,
-              model: item.model,
-              status: "pending"
-            });
+          const trimmed = line.trim();
+          if (!trimmed) continue;
+
+          const upperLine = trimmed.toUpperCase();
+          const startsWithDigit = /^\d+/.test(trimmed);
+
+          // Detect Section Header Line
+          if (!startsWithDigit && (upperLine.includes("—") || upperLine.includes(" - ") || upperLine.includes("HOMME") || upperLine.includes("FEMME") || upperLine.includes("UNISEXE") || upperLine.includes("DUBAO") || upperLine.includes("DUBAÏ") || upperLine.includes("DUBAI") || upperLine.includes("SAISON"))) {
+            // Saison Extraction
+            if (upperLine.includes("HIVER")) {
+              currentSaison = "hiver";
+            } else if (upperLine.includes("ÉTÉ") || upperLine.includes("ETE")) {
+              currentSaison = "ete";
+            } else if (upperLine.includes("PRINTEMPS") || upperLine.includes("AUTOMNE") || upperLine.includes("MI-SAISON")) {
+              currentSaison = "mi-saison";
+            } else if (upperLine.includes("DUBAÏ") || upperLine.includes("DUBAI")) {
+              currentSaison = "dubai";
+            } else {
+              currentSaison = "autre";
+            }
+
+            // Genre / Category Extraction
+            if (upperLine.includes("FEMME")) {
+              currentGenre = "femme";
+              currentCategory = "Femme";
+            } else if (upperLine.includes("UNISEXE")) {
+              currentGenre = "unisexe";
+              currentCategory = "Unisexe";
+            } else if (upperLine.includes("HOMME")) {
+              currentGenre = "homme";
+              currentCategory = "Homme";
+            }
+            continue;
           }
+
+          // Parse ordinary numeric-prefixed perfume line, e.g. "1. Creed Aventus = Club de Nuit = Supremacy"
+          const match = trimmed.match(/^(\d+)[\s.]*([^]*)$/);
+          let numero = parsed.length + 1;
+          let content = trimmed;
+          if (match) {
+            numero = parseInt(match[1], 10);
+            content = match[2].trim();
+          }
+
+          // Split on " = " string representation
+          const parts = content.split(/\s*=\s*/).map(p => p.trim());
+          const original = parts[0] || "";
+          if (!original) continue;
+
+          const dupe1 = parts[1] || null;
+          const dupe2 = parts[2] || null;
+
+          // Extrapolate Brand + Model
+          const parsedOrig = parsePerfumeLine(original);
+          const brand = parsedOrig ? parsedOrig.brand : original;
+          const model = parsedOrig ? parsedOrig.model : original;
+
+          // Assign color theme according to specifications
+          let theme: "gold" | "pink" | "blue" = "gold";
+          if (currentCategory === "Femme") {
+            theme = "pink";
+          } else if (currentCategory === "Unisexe") {
+            theme = "blue";
+          } else {
+            // All male fragrances default to gold theme, except marine/fresh which get blue theme
+            const lowerOrig = original.toLowerCase();
+            if (["sport", "fresh", "frais", "blue", "bleu", "water", "eau", "marine", "ocean", "aquatic"].some(k => lowerOrig.includes(k))) {
+              theme = "blue";
+            } else {
+              theme = "gold";
+            }
+          }
+
+          parsed.push({
+            numero,
+            original,
+            dupe1,
+            dupe2,
+            saison: currentSaison,
+            genre: currentGenre,
+            brand,
+            model,
+            theme,
+            category: currentCategory,
+            status: "pending"
+          });
         }
+
         setBatchLines(parsed);
         setBatchProgress(0);
       }
@@ -227,7 +336,16 @@ export default function AdminDashboard({
           sizes: [
             { ml: "100ml", price: priceNum },
             { ml: "50ml", price: Math.round(priceNum * 0.65) }
-          ]
+          ],
+          // Keep all parsed TXT file attributes
+          numero: current.numero,
+          original: current.original,
+          dupe1: current.dupe1,
+          dupe2: current.dupe2,
+          saison: current.saison,
+          genre: current.genre,
+          theme: current.theme,
+          category: current.category
         };
 
         // Step 2: Post to catalog
@@ -1018,36 +1136,59 @@ export default function AdminDashboard({
                       )}
 
                       {/* Parsed List */}
-                      <div className="max-h-[180px] overflow-y-auto space-y-1.5 pr-1 border border-neutral-950 p-2 rounded bg-neutral-950/20">
+                      <div className="max-h-[190px] overflow-y-auto space-y-1.5 pr-1 border border-neutral-950 p-2 rounded bg-neutral-950/20">
                         {batchLines.map((item, idx) => (
                           <div
                             key={idx}
-                            className="flex items-center justify-between text-[11px] p-2 bg-neutral-950/40 rounded border border-neutral-900/40"
+                            className="flex flex-col gap-1 text-[11px] p-2 bg-neutral-950/40 rounded border border-neutral-900/40"
                           >
-                            <div className="min-w-0 pr-2 flex-1">
-                              <span className="text-[8px] uppercase tracking-wider text-neutral-500 font-bold block leading-none">{item.brand}</span>
-                              <span className="text-white font-medium truncate block mt-0.5 leading-none">{item.model}</span>
-                            </div>
+                            <div className="flex items-start justify-between">
+                              <div className="min-w-0 pr-2 flex-1">
+                                <div className="flex items-center gap-1.5">
+                                  <span className="text-[9px] font-mono text-[#D4AF37] bg-[#D4AF37]/10 px-1 rounded">#{item.numero}</span>
+                                  <span className="text-[8px] uppercase tracking-wider text-neutral-500 font-bold block leading-none">{item.brand}</span>
+                                </div>
+                                <span className="text-white font-medium truncate block mt-0.5 leading-none">{item.model}</span>
+                              </div>
 
-                            <div className="flex items-center flex-shrink-0">
-                              {item.status === "pending" && (
-                                <span className="text-[9px] text-neutral-500 font-bold uppercase tracking-wider bg-neutral-900 px-1.5 py-0.5 rounded border border-neutral-800">
-                                  Prêt
+                              <div className="flex items-center flex-shrink-0 gap-1.5">
+                                {item.status === "pending" && (
+                                  <span className="text-[9px] text-neutral-500 font-bold uppercase tracking-wider bg-neutral-900 px-1.5 py-0.5 rounded border border-neutral-800">
+                                    Prêt
+                                  </span>
+                                )}
+                                {item.status === "processing" && (
+                                  <span className="text-[9px] text-indigo-400 font-bold uppercase tracking-wider bg-indigo-950/20 px-1.5 py-0.5 rounded border border-indigo-950 flex items-center gap-1">
+                                    <Loader className="w-2.5 h-2.5 animate-spin" /> IA...
+                                  </span>
+                                )}
+                                {item.status === "success" && (
+                                  <span className="text-[9px] text-green-400 font-bold uppercase tracking-wider bg-green-950/20 px-1.5 py-0.5 rounded border border-green-900/20">
+                                    Ajouté
+                                  </span>
+                                )}
+                                {item.status === "error" && (
+                                  <span className="text-[9px] text-red-400 font-bold uppercase tracking-wider bg-red-950/20 px-1.5 py-0.5 rounded border border-red-900/20" title={item.error}>
+                                    Échec
+                                  </span>
+                                )}
+                              </div>
+                            </div>
+                            <div className="flex flex-wrap gap-1 text-[8px] mt-1 text-neutral-500 font-mono">
+                              <span className="bg-neutral-900 px-1 py-0.5 rounded uppercase border border-neutral-850">
+                                Saison: {item.saison}
+                              </span>
+                              <span className="bg-neutral-900 px-1 py-0.5 rounded uppercase border border-neutral-850">
+                                Cat: {item.category}
+                              </span>
+                              {item.dupe1 && (
+                                <span className="bg-neutral-900/60 px-1 py-0.5 rounded text-indigo-450 border border-neutral-850 max-w-[125px] truncate" title={`Dupe 1: ${item.dupe1}`}>
+                                  Dup: {item.dupe1}
                                 </span>
                               )}
-                              {item.status === "processing" && (
-                                <span className="text-[9px] text-indigo-400 font-bold uppercase tracking-wider bg-indigo-950/20 px-1.5 py-0.5 rounded border border-indigo-950 flex items-center gap-1">
-                                  <Loader className="w-2.5 h-2.5 animate-spin" /> IA...
-                                </span>
-                              )}
-                              {item.status === "success" && (
-                                <span className="text-[9px] text-green-400 font-bold uppercase tracking-wider bg-green-950/20 px-1.5 py-0.5 rounded border border-green-900/20">
-                                  Ajouté
-                                </span>
-                              )}
-                              {item.status === "error" && (
-                                <span className="text-[9px] text-red-400 font-bold uppercase tracking-wider bg-red-950/20 px-1.5 py-0.5 rounded border border-red-900/20" title={item.error}>
-                                  Échec
+                              {item.dupe2 && (
+                                <span className="bg-neutral-900/60 px-1 py-0.5 rounded text-indigo-455 border border-neutral-850 max-w-[125px] truncate" title={`Dupe 2: ${item.dupe2}`}>
+                                  Dup2: {item.dupe2}
                                 </span>
                               )}
                             </div>
