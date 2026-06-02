@@ -1,0 +1,211 @@
+[
+  {
+    "id": "ORD-1919",
+    "customer": {
+      "name": "Hassane Bagayoko",
+      "email": "hassane05bagayoko@gmail.com",
+      "phone": "13016401968",
+      "address": "5058 Oakmoore Dr",
+      "city": "Rockville",
+      "zipCode": "20852"
+    },
+    "items": [
+      {
+        "perfume": {
+          "id": "armani-swy",
+          "name": "Stronger With You Intensely",
+          "brand": "Emporio Armani",
+          "theme": "gold",
+          "category": "Homme",
+          "price": 110,
+          "sizes": [
+            {
+              "ml": "50 ml",
+              "price": 110
+            },
+            {
+              "ml": "100 ml",
+              "price": 155
+            },
+            {
+              "ml": "150 ml",
+              "price": 195
+            }
+          ],
+          "description": "Un parfum oriental fougère captivant infusé de notes de poivre rose, de cannelle et d'accord de daim marron vanillé. Une signature d'amour intense incarnant la force de la passion.",
+          "notes": [
+            "Poivre Rose",
+            "Cannelle",
+            "Vanille de Madagascar",
+            "Daim",
+            "Toffee"
+          ],
+          "topNotes": [
+            "Poivre Rose",
+            "Genièvre",
+            "Violette"
+          ],
+          "heartNotes": [
+            "Cannelle",
+            "Sauge",
+            "Lavande",
+            "Toffee"
+          ],
+          "baseNotes": [
+            "Vanille",
+            "Suède",
+            "Ambre",
+            "Fève de Tonka"
+          ],
+          "image": "/src/assets/images/1.png",
+          "isBestSeller": true,
+          "accords": [
+            {
+              "name": "épicé chaud",
+              "value": 95,
+              "color": "#b35a20"
+            },
+            {
+              "name": "vanille",
+              "value": 85,
+              "color": "#cfb980"
+            },
+            {
+              "name": "boisé",
+              "value": 75,
+              "color": "#825d38"
+            },
+            {
+              "name": "sucré",
+              "value": 70,
+              "color": "#bc517c"
+            },
+            {
+              "name": "ambre",
+              "value": 65,
+              "color": "#aa7c11"
+            }
+          ]
+        },
+        "selectedSize": "50 ml",
+        "selectedPrice": 110,
+        "quantity": 1
+      }
+    ],
+    "subtotal": 110,
+    "shipping": 15,
+    "total": 125,
+    "date": "2026-05-21T17:02:31.264Z",
+    "status": "Livré"
+  },
+  {
+    "id": "ORD-7193",
+    "customer": {
+      "name": "Jean Dupont",
+      "email": "jean.dupont@gmail.com",
+      "phone": "+33 6 12 34 56 78",
+      "address": "14 Avenue des Champs-Élysées",
+      "city": "Paris",
+      "zipCode": "75008"
+    },
+    "items": [
+      {
+        "perfume": {
+          "id": "creed-aventus",
+          "name": "Aventus",
+          "brand": "Creed",
+          "theme": "navy",
+          "category": "Homme",
+          "price": 240,
+          "image": "https://fimgs.net/images/perfume/375x500.9828.jpg"
+        },
+        "selectedSize": "100 ml",
+        "selectedPrice": 240,
+        "quantity": 1
+      }
+    ],
+    "subtotal": 240,
+    "shipping": 0,
+    "total": 240,
+    "date": "2026-05-19T10:24:00.000Z",
+    "status": "Livré"
+  },
+  {
+    "id": "ORD-5829",
+    "customer": {
+      "name": "Sophia Laurent",
+      "email": "sophia.laurent@outlook.fr",
+      "phone": "+33 7 89 01 23 45",
+      "address": "8 Rue de la Paix",
+      "city": "Lyon",
+      "zipCode": "69002"
+    },
+    "items": [
+      {
+        "perfume": {
+          "id": "chanel-coco-mademoiselle",
+          "name": "Coco Mademoiselle",
+          "brand": "Chanel",
+          "theme": "pink",
+          "category": "Femme",
+          "price": 135,
+          "image": "https://fimgs.net/images/perfume/375x500.611.jpg"
+        },
+        "selectedSize": "50 ml",
+        "selectedPrice": 135,
+        "quantity": 1
+      },
+      {
+        "perfume": {
+          "id": "dior-sauvage",
+          "name": "Sauvage",
+          "brand": "Dior",
+          "theme": "blue",
+          "category": "Homme",
+          "price": 95,
+          "image": "https://fimgs.net/images/perfume/375x500.31861.jpg"
+        },
+        "selectedSize": "50 ml",
+        "selectedPrice": 95,
+        "quantity": 1
+      }
+    ],
+    "subtotal": 230,
+    "shipping": 0,
+    "total": 230,
+    "date": "2026-05-20T15:45:00.000Z",
+    "status": "Expédié"
+  },
+  {
+    "id": "ORD-9302",
+    "customer": {
+      "name": "Marc Bernard",
+      "email": "m.bernard@yahoo.fr",
+      "phone": "+33 6 45 92 10 33",
+      "address": "45 Promenade des Anglais",
+      "city": "Nice",
+      "zipCode": "06000"
+    },
+    "items": [
+      {
+        "perfume": {
+          "id": "dior-sauvage",
+          "name": "Sauvage",
+          "brand": "Dior",
+          "theme": "blue",
+          "category": "Homme",
+          "price": 95,
+          "image": "https://fimgs.net/images/perfume/375x500.31861.jpg"
+        },
+        "selectedSize": "50 ml",
+        "selectedPrice": 95,
+        "quantity": 1
+      }
+    ],
+    "subtotal": 95,
+    "shipping": 15,
+    "total": 110,
+    "date": "2026-05-21T09:12:00.000Z",
+    "status": "En attente"
+  }
+]

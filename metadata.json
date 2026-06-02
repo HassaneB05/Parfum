@@ -1,0 +1,6 @@
+{
+  "name": "Luxora Perfumes",
+  "description": "Luxora - Parfums d'Exception. Une boutique en ligne haut de gamme avec un slider immersif et interactif à thème variable (Or, Rubis, Céleste), un catalogue de fragrances rares et un panier d'achat élégant.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
